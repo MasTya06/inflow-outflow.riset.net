@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografis Interaktif: Aliran Dana Global 2024-2025 (Versi AI)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .kpi-value {
+            color: #00F5D4;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .flow-arrow {
+            position: relative;
+            padding: 0 20px;
+        }
+        .flow-arrow::after {
+            content: '→';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: #00A39A;
+        }
+        .flow-item:last-child .flow-arrow::after {
+            content: '';
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #00F5D4;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .gemini-button {
+            background-color: #007A76;
+            color: white;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+        .gemini-button:hover {
+            background-color: #005252;
+        }
+         .gemini-button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .ai-response {
+            background-color: #eef2f7;
+            border-left: 4px solid #00F5D4;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.25rem;
+            white-space: pre-wrap;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="errorModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-11/12 md:w-1/3">
+            <h3 class="text-lg font-bold text-red-600">Terjadi Kesalahan</h3>
+            <p id="errorMessage" class="mt-2 text-sm text-gray-700">Tidak dapat memproses permintaan. Silakan coba lagi nanti.</p>
+            <button onclick="document.getElementById('errorModal').classList.add('hidden')" class="mt-4 w-full bg-red-600 text-white font-bold py-2 px-4 rounded hover:bg-red-700">Tutup</button>
+        </div>
+    </div>
+    
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-gray-900 mb-4">Analisis Aliran Dana Global</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Tinjauan pergeseran modal global Q3 2024 - Q2 2025: Rotasi hati-hati dari kas menuju aset berpendapatan tetap dan aset berisiko secara selektif.</p>
+        </header>
+
+        <section class="mb-16">
+            <div class="card max-w-3xl mx-auto text-center bg-gray-900 text-white">
+                <h2 class="text-xl font-semibold text-gray-300 mb-2">Aliran Masuk Rekor ke Obligasi (Q1 2025)</h2>
+                <p class="text-6xl md:text-8xl font-black kpi-value">$136,1 Miliar</p>
+                <p class="mt-2 text-gray-400">Investor institusional "mengunci" imbal hasil tinggi menjelang potensi penurunan suku bunga, menjadikan obligasi sebagai kelas aset terfavorit.</p>
+                 <div class="mt-6">
+                    <button id="generateSummaryBtn" class="gemini-button">✨ Buat Ringkasan Strategis AI</button>
+                    <div id="summaryLoader" class="mx-auto mt-4 spinner hidden"></div>
+                    <div id="summaryResponse" class="ai-response text-left hidden"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8">Panggung Makroekonomi: Faktor Penggerak Utama</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="card text-center">
+                    <div class="text-4xl mb-3">🏦</div>
+                    <h3 class="font-bold text-lg">Kebijakan Suku Bunga</h3>
+                    <p class="text-sm text-gray-600">Ekspektasi puncak siklus kenaikan suku bunga mendorong investor beralih ke obligasi.</p>
+                </div>
+                <div class="card text-center">
+                    <div class="text-4xl mb-3">🌍</div>
+                    <h3 class="font-bold text-lg">Geopolitik Global</h3>
+                    <p class="text-sm text-gray-600">Konflik dan ketegangan dagang meningkatkan permintaan untuk aset aman seperti emas.</p>
+                </div>
+                <div class="card text-center">
+                    <div class="text-4xl mb-3">📉</div>
+                    <h3 class="font-bold text-lg">Meredanya Inflasi</h3>
+                    <p class="text-sm text-gray-600">Penurunan laju inflasi memperkuat keyakinan pasar akan pemangkasan suku bunga.</p>
+                </div>
+                <div class="card text-center">
+                    <div class="text-4xl mb-3">📜</div>
+                    <h3 class="font-bold text-lg">Regulasi & Inovasi</h3>
+                    <p class="text-sm text-gray-600">Peluncuran ETF Kripto di AS menjadi katalis masuknya dana institusional ke aset digital.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8">Ke Mana Uang Mengalir? Analisis per Kelas Aset</h2>
+            <div class="card p-6 mb-8">
+                 <h3 class="text-xl font-bold text-center mb-4">Perbandingan Aliran Dana Masuk Bersih (Q1 2025)</h3>
+                 <p class="text-center text-sm text-gray-600 mb-4">Obligasi secara signifikan memimpin dalam menarik modal baru, diikuti oleh ekuitas, sementara emas dan kripto menerima aliran yang lebih moderat.</p>
+                <div class="chart-container max-w-4xl">
+                    <canvas id="assetFlowsChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card lg:col-span-1">
+                    <h3 class="font-bold text-lg mb-2">📈 Pasar Saham (Ekuitas)</h3>
+                    <p class="text-sm text-gray-600 mb-4">Aliran dana ke ekuitas tetap kuat meskipun bergejolak, menunjukkan optimisme selektif dari investor.</p>
+                    <div class="chart-container h-64">
+                        <canvas id="equityFlowsChart"></canvas>
+                    </div>
+                </div>
+                <div class="card lg:col-span-1 flex flex-col justify-center items-center text-center">
+                    <h3 class="font-bold text-lg mb-2">🪙 Emas (Komoditas)</h3>
+                    <p class="text-sm text-gray-600 mb-4">Bank sentral dunia menjadi pembeli utama, memperkuat status emas sebagai aset lindung nilai.</p>
+                    <p class="text-5xl font-black kpi-value">1.045</p>
+                    <p class="font-semibold">Ton Emas</p>
+                    <p class="text-xs text-gray-500 mt-1">Dibeli oleh Bank Sentral pada 2024</p>
+                </div>
+                <div class="card lg:col-span-1">
+                     <h3 class="font-bold text-lg mb-2">💎 Aset Kripto</h3>
+                     <p class="text-sm text-gray-600 mb-4">Setelah euforia ETF, pasar kripto memasuki fase konsolidasi dengan sentimen yang lebih berhati-hati.</p>
+                     <div class="chart-container h-64">
+                        <canvas id="cryptoSentimentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8">Pemisah Besar: Strategi Institusi vs. Ritel</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="font-bold text-xl text-center mb-4">Investor Institusional: Alokasi Terukur</h3>
+                    <p class="text-sm text-gray-600 text-center mb-4">Institusi memperlakukan kripto sebagai bagian kecil dari portofolio terdiversifikasi, dengan fokus utama pada aset berpendapatan tetap.</p>
+                    <div class="chart-container">
+                        <canvas id="institutionalPortfolioChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="font-bold text-xl text-center mb-4">Investor Ritel: Bergeser ke DeFi</h3>
+                    <p class="text-sm text-gray-600 text-center mb-4">Volume di bursa terpusat menurun, sementara modal ritel beralih ke protokol DeFi untuk mencari imbal hasil dan keamanan mandiri.</p>
+                    <div class="flex flex-col items-center justify-center h-full mt-8 md:mt-0">
+                        <div class="flow-item text-center">
+                            <div class="p-3 bg-red-100 text-red-700 rounded-lg font-bold">Bursa Terpusat (CEX)</div>
+                            <p class="text-xs text-gray-500 mt-1">Volume Turun 22%</p>
+                            <div class="flow-arrow my-2"></div>
+                        </div>
+                        <div class="flow-item text-center">
+                           <div class="p-3 bg-green-100 text-green-700 rounded-lg font-bold">Protokol DeFi & Layer-2</div>
+                           <p class="text-xs text-gray-500 mt-1">TVL Naik 8%</p>
+                           <div class="flow-arrow my-2"></div>
+                        </div>
+                        <div class="flow-item text-center">
+                           <div class="p-3 bg-blue-100 text-blue-700 rounded-lg font-bold">Cold Storage (Dompet Pribadi)</div>
+                           <p class="text-xs text-gray-500 mt-1">Net Outflow Naik 35%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8">Pandangan ke Depan: Proyeksi & Analisis AI</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                 <div class="card">
+                    <h3 class="font-bold text-xl mb-4 text-center">Proyeksi Aset (Q3–Q4 2025)</h3>
+                     <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr><th scope="col" class="px-6 py-3">Aset</th><th scope="col" class="px-6 py-3">Proyeksi</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white border-b"><th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">Suku Bunga (Fed)</th><td class="px-6 py-4">Potensi pemangkasan pada Des '25 (target 4,5%)</td></tr>
+                                <tr class="bg-white border-b"><th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">Ekuitas AS (S&P 500)</th><td class="px-6 py-4">Pertumbuhan moderat 5–7%</td></tr>
+                                <tr class="bg-white border-b"><th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">Emas</th><td class="px-6 py-4">Konsolidasi di kisaran $1.950–$2.100/oz</td></tr>
+                                <tr class="bg-white border-b"><th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">Bitcoin</th><td class="px-6 py-4">Konsolidasi di rentang $90.000–$120.000</td></tr>
+                                <tr class="bg-white"><th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">DeFi Yield</th><td class="px-6 py-4">Stabil di 6-10% p.a.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="font-bold text-xl mb-4 text-center">✨ Tanya Analis AI</h3>
+                    <p class="text-sm text-gray-600 text-center mb-4">Ajukan pertanyaan terkait strategi investasi berdasarkan data laporan ini.</p>
+                    <div class="space-y-4">
+                        <textarea id="analystQuestion" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-400 focus:border-transparent" rows="3" placeholder="Contoh: Berdasarkan data ini, apakah lebih baik berinvestasi di emas atau obligasi untuk 6 bulan ke depan?"></textarea>
+                        <button id="askAnalystBtn" class="w-full gemini-button">Kirim Pertanyaan</button>
+                    </div>
+                    <div id="analystLoader" class="mx-auto mt-4 spinner hidden"></div>
+                    <div id="analystResponse" class="ai-response hidden"></div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center mt-12 pt-8 border-t border-gray-200">
+            <p class="text-gray-600">Lanskap investasi global menunjukkan rotasi modal yang matang dan terdiversifikasi.</p>
+            <p class="text-xs text-gray-400 mt-2">Data disintesis dari berbagai laporan pasar. Analisis AI didukung oleh Google Gemini.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const vibrantPalette = {
+                teal: ['#00F5D4', '#00CCBF', '#00A39A', '#007A76', '#005252'],
+                pink: ['#F785A4', '#F45C89', '#F2336D', '#EB0D53', '#C40A45'],
+                gray: 'rgba(107, 114, 128, 0.7)'
+            };
+
+            const tooltipConfig = {
+                plugins: { tooltip: { callbacks: {
+                    title: function(tooltipItems) {
+                        const item = tooltipItems[0];
+                        let label = item.chart.data.labels[item.dataIndex];
+                        if (Array.isArray(label)) { return label.join(' '); }
+                        return label;
+                    }
+                }}}
+            };
+
+            function wrapLabel(str, maxWidth) {
+                if (str.length <= maxWidth) { return str; }
+                const words = str.split(' ');
+                const lines = [];
+                let currentLine = '';
+                words.forEach(word => {
+                    if ((currentLine + word).length > maxWidth) {
+                        lines.push(currentLine.trim());
+                        currentLine = '';
+                    }
+                    currentLine += word + ' ';
+                });
+                lines.push(currentLine.trim());
+                return lines;
+            }
+
+            const reportContext = `Kondisi Pasar Global (Q3 2024 - Q2 2025):
+            1. Aliran Dana: Terjadi rotasi besar dari kas ke obligasi, dengan rekor inflow $136.1 miliar di Q1 2025 karena investor mengunci yield tinggi. Aliran ke ekuitas kuat namun melambat. Emas dibeli secara agresif oleh bank sentral (1.045 ton di 2024).
+            2. Aset Kripto: Pasar memasuki fase konsolidasi setelah euforia ETF. Sentimen mendingin (Indeks Fear & Greed turun dari 68 ke 52). Investor ritel beralih ke DeFi. Alokasi institusional ke kripto masih kecil (~6%).
+            3. Proyeksi: The Fed kemungkinan akan memangkas suku bunga pada Desember 2025. Pertumbuhan ekuitas moderat (5-7%). Bitcoin diperkirakan berkonsolidasi di $90k-$120k.
+            4. Strategi Investor: Institusi fokus pada obligasi. Ritel beralih ke DeFi untuk yield dan keamanan.`;
+
+            function showErrorModal(message = "Tidak dapat memproses permintaan. Silakan coba lagi nanti.") {
+                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('errorModal').classList.remove('hidden');
+            }
+
+            async function callGeminiAPI(prompt) {
+                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        console.error('Invalid response structure:', result);
+                        throw new Error('Struktur respons dari API tidak valid.');
+                    }
+                } catch (error) {
+                    console.error("Error calling Gemini API:", error);
+                    showErrorModal(error.message);
+                    return null;
+                }
+            }
+
+            const generateSummaryBtn = document.getElementById('generateSummaryBtn');
+            const summaryLoader = document.getElementById('summaryLoader');
+            const summaryResponse = document.getElementById('summaryResponse');
+
+            generateSummaryBtn.addEventListener('click', async () => {
+                summaryLoader.classList.remove('hidden');
+                summaryResponse.classList.add('hidden');
+                generateSummaryBtn.disabled = true;
+
+                const prompt = `Anda adalah seorang analis keuangan senior. Berdasarkan konteks pasar berikut, berikan ringkasan strategis singkat (3-4 kalimat) untuk seorang eksekutif. Fokus pada implikasi utama.\n\nKonteks: ${reportContext}`;
+                
+                const text = await callGeminiAPI(prompt);
+
+                if (text) {
+                    summaryResponse.textContent = text;
+                    summaryResponse.classList.remove('hidden');
+                }
+
+                summaryLoader.classList.add('hidden');
+                generateSummaryBtn.disabled = false;
+            });
+
+            const askAnalystBtn = document.getElementById('askAnalystBtn');
+            const analystQuestion = document.getElementById('analystQuestion');
+            const analystLoader = document.getElementById('analystLoader');
+            const analystResponse = document.getElementById('analystResponse');
+
+            askAnalystBtn.addEventListener('click', async () => {
+                const question = analystQuestion.value.trim();
+                if (!question) {
+                    showErrorModal("Silakan masukkan pertanyaan Anda.");
+                    return;
+                }
+
+                analystLoader.classList.remove('hidden');
+                analystResponse.classList.add('hidden');
+                askAnalystBtn.disabled = true;
+                analystQuestion.disabled = true;
+
+                const prompt = `Anda adalah seorang analis keuangan AI yang membantu pengguna memahami kondisi pasar. Berdasarkan konteks pasar berikut, jawab pertanyaan pengguna secara singkat dan jelas.\n\nKonteks Pasar: ${reportContext}\n\nPertanyaan Pengguna: "${question}"`;
+
+                const text = await callGeminiAPI(prompt);
+                
+                if (text) {
+                    analystResponse.textContent = text;
+                    analystResponse.classList.remove('hidden');
+                }
+
+                analystLoader.classList.add('hidden');
+                askAnalystBtn.disabled = false;
+                analystQuestion.disabled = false;
+            });
+
+
+            // Chart rendering
+            const assetFlowsCtx = document.getElementById('assetFlowsChart').getContext('2d');
+            new Chart(assetFlowsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Obligasi', 'Ekuitas', 'Emas', ['ETF Kripto']],
+                    datasets: [{
+                        label: 'Aliran Dana Masuk (Miliar USD)',
+                        data: [136.1, 158.0, 21.0, 4.2],
+                        backgroundColor: [vibrantPalette.teal[0], vibrantPalette.teal[1], vibrantPalette.teal[2], vibrantPalette.teal[3]],
+                        borderWidth: 1
+                    }]
+                },
+                options: { ...tooltipConfig, responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Miliar USD' } } }, plugins: { ...tooltipConfig.plugins, legend: { display: false } } }
+            });
+
+            const equityFlowsCtx = document.getElementById('equityFlowsChart').getContext('2d');
+            new Chart(equityFlowsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Q4 2024', 'Q1 2025'],
+                    datasets: [{
+                        label: 'Aliran Dana Masuk (Miliar EUR)',
+                        data: [354, 148],
+                        fill: true,
+                        backgroundColor: 'rgba(0, 245, 212, 0.2)',
+                        borderColor: vibrantPalette.teal[0],
+                        tension: 0.1
+                    }]
+                },
+                options: { ...tooltipConfig, responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Miliar EUR' } } }, plugins: { ...tooltipConfig.plugins, legend: { display: false } } }
+            });
+
+            const cryptoSentimentCtx = document.getElementById('cryptoSentimentChart').getContext('2d');
+            new Chart(cryptoSentimentCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Feb \'25', 'Jun \'25'],
+                    datasets: [{
+                        label: 'Indeks Fear & Greed',
+                        data: [68, 52],
+                        fill: false,
+                        borderColor: vibrantPalette.pink[2],
+                        tension: 0.1
+                    }]
+                },
+                options: { ...tooltipConfig, responsive: true, maintainAspectRatio: false, plugins: { ...tooltipConfig.plugins, legend: { display: false } }, scales: { y: { title: { display: true, text: 'Indeks (0-100)' }, min: 0, max: 100 } } }
+            });
+
+            const institutionalPortfolioCtx = document.getElementById('institutionalPortfolioChart').getContext('2d');
+            new Chart(institutionalPortfolioCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Obligasi', 'Aset Kripto', 'Lainnya'],
+                    datasets: [{
+                        label: 'Alokasi Portofolio',
+                        data: [60, 6, 34],
+                        backgroundColor: [vibrantPalette.teal[3], vibrantPalette.pink[1], vibrantPalette.gray],
+                        hoverOffset: 4
+                    }]
+                },
+                options: { ...tooltipConfig, responsive: true, maintainAspectRatio: false, plugins: { ...tooltipConfig.plugins, legend: { position: 'bottom' } } }
+            });
+            
+            const recommendedPortfolioCtx = document.getElementById('recommendedPortfolioChart');
+            if (recommendedPortfolioCtx) {
+                 new Chart(recommendedPortfolioCtx.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Obligasi', 'Ekuitas', wrapLabel('Emas & Komoditas', 16), 'Aset Digital', wrapLabel('Kas & Lainnya', 16)],
+                        datasets: [{
+                            label: 'Alokasi Portofolio',
+                            data: [30, 35, 8, 5, 22],
+                            backgroundColor: [vibrantPalette.teal[4], vibrantPalette.teal[2], vibrantPalette.teal[0], vibrantPalette.pink[2], vibrantPalette.gray],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: { ...tooltipConfig, responsive: true, maintainAspectRatio: false, plugins: { ...tooltipConfig.plugins, legend: { position: 'bottom' } } }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
